@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "react": "^15.5.4",
-    "webpack": "^4.39.1",
+    "webpack": "4.39.1",
     "webpack-cli": "^3.3.10"
   },
   "scripts": {
