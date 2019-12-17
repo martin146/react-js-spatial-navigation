@@ -231,7 +231,7 @@ class Focusable extends Component {
 
     let aria = {};
     for (let key in this.props) {
-      if (key.indexOf('aria') === 0) {
+      if (key.indexOf('aria') === 0 || key === 'role') {
         aria[key] = this.props[key];
       }
     }
