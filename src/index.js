@@ -155,24 +155,28 @@ function getSelector(id) {
  */
 class Focusable extends Component {
   componentWillFocus(e) {
+    // console.warn('Focusable.componentWillFocus: ' + this.context.focusableSectionId, e.target);
     if (this.props.onBeforeFocus) {
       this.props.onBeforeFocus(e);
     }
   }
 
   componentFocused(e) {
+    // console.warn('Focusable.componentFocused: ' + this.context.focusableSectionId, e.target);
     if (this.props.onFocus) {
       this.props.onFocus(e);
     }
   }
 
   componentUnfocused(e) {
+    // console.warn('Focusable.componentUnfocused: ' + this.context.focusableSectionId, e.target);
     if (this.props.onUnfocus) {
       this.props.onUnfocus(e);
     }
   }
 
   componentClickEnter(e) {
+    // console.warn('Focusable.componentClickEnter: ' + this.context.focusableSectionId, e.target);
     if (this.props.onClickEnter) {
       this.props.onClickEnter(e);
     }
@@ -309,6 +313,10 @@ class FocusableSection extends Component {
     neighborRight: PropTypes.string,
     neighborDown: PropTypes.string,
     neighborLeft: PropTypes.string,
+    onBeforeFocus: PropTypes.func,
+    onFocus: PropTypes.func,
+    onClickEnter: PropTypes.func,
+    onUnfocus: PropTypes.func
   };
 
   static defaultProps = {
@@ -317,7 +325,13 @@ class FocusableSection extends Component {
     neighborRight: null,
     neighborDown: null,
     neighborLeft: null,
+    onBeforeFocus: null,
+    onFocus: null,
+    onClickEnter: null,
+    onUnfocus: null
   };
+
+  static eventOptions = true;//use capture, using boolean vs option because need to support older webkit < 10
 
   constructor(props) {
     super(props);
@@ -329,17 +343,58 @@ class FocusableSection extends Component {
     }
   }
 
-  getChildContext() {
-    return {focusableSectionId: this.sectionId};
+  componentWillFocus(e) {
+    const prevIsChild = e.detail.previousElement && this.el.contains(e.detail.previousElement);
+    if(prevIsChild){
+      return;
+    }
+    // console.warn('FocusableSection.componentWillFocus: ' + this.sectionId, e.target.className, document.activeElement);
+    if (this.props.onBeforeFocus) {
+      this.props.onBeforeFocus(e);
+    }
   }
 
-  componentWillUnmount() {
-    JsSpatialNavigation.remove(this.sectionId);
+  componentFocused(e) {
+    const prevIsChild = e.detail.previousElement && this.el.contains(e.detail.previousElement);
+    if(prevIsChild){
+      return;
+    }
+    // console.warn('FocusableSection.componentFocused: ' + this.sectionId, e.target.className, document.activeElement);
+    if (this.props.onFocus) {
+      this.props.onFocus(e);
+    }
+  }
+
+  componentUnfocused(e) {
+    const leaving = this.sectionId !== e.detail.nextSectionId;
+    if(!leaving){
+      return;
+    }
+    // console.warn('FocusableSection.componentUnfocused: ' + this.sectionId, e.target.className, document.activeElement);
+    if (this.props.onUnfocus && leaving) {
+      this.props.onUnfocus(e);
+    }
+  }
+
+  componentClickEnter(e) {
+    // console.warn('FocusableSection.componentClickEnter: ' + this.sectionId, e.target.className, document.activeElement);
+    if (this.props.onClickEnter) {
+      this.props.onClickEnter(e);
+    }
+  }
+
+  getChildContext() {
+    return {focusableSectionId: this.sectionId};
   }
 
   _getSelector() {
     return getSelector(this.sectionId);
   }
+
+  _componentWillFocus = (event) => this.componentWillFocus(event);
+  _componentFocused = (event) => this.componentFocused(event);
+  _componentUnfocused = (event) => this.componentUnfocused(event);
+  _componentClickEnter = (event) => this.componentClickEnter(event);
 
   componentDidMount() {
     let defaultElement = this.props.defaultElement;
@@ -376,6 +431,23 @@ class FocusableSection extends Component {
       defaultElement: defaultElement,
       leaveFor: leaveFor
     });
+
+    if (!this.el)
+      return;
+
+    this.el.addEventListener('sn:willfocus', this._componentWillFocus, FocusableSection.eventOptions);
+    this.el.addEventListener('sn:focused', this._componentFocused, FocusableSection.eventOptions);
+    this.el.addEventListener('sn:unfocused', this._componentUnfocused, FocusableSection.eventOptions);
+    this.el.addEventListener('sn:enter-up', this._componentClickEnter, FocusableSection.eventOptions);
+  }
+
+  componentWillUnmount() {
+    JsSpatialNavigation.remove(this.sectionId);
+
+    this.el.removeEventListener('sn:focused', this._componentFocused, FocusableSection.eventOptions);
+    this.el.removeEventListener('sn:unfocused', this._componentUnfocused, FocusableSection.eventOptions);
+    this.el.removeEventListener('sn:enter-up', this._componentClickEnter, FocusableSection.eventOptions);
+    this.el.removeEventListener('keydown', this._componentKeyDown, FocusableSection.eventOptions);
   }
 
   render() {
@@ -386,7 +458,7 @@ class FocusableSection extends Component {
     }
 
     return (
-      <div className={classNames.join(' ')}>
+      <div className={classNames.join(' ')} ref={e => this.el = e}>
         {this.props.children}
       </div>
     );
