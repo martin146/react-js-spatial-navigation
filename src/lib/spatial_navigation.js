@@ -594,6 +594,13 @@ function focusElement(elem, sectionId, direction) {
 
   var currentFocusedElement = getCurrentFocusedElement();
 
+  //Chad added to prevent double focus, this may break things since focusElement() seems to be called
+  //multiple times each time relying on different local vars about the event phase.
+  if(currentFocusedElement === elem){
+    return;//already has focus
+  }
+  //End Chad added
+
   var silentFocus = function() {
     if (currentFocusedElement) {
       currentFocusedElement.blur();
