@@ -326,6 +326,7 @@ class FocusableSection extends Component {
     neighborDown: null,
     neighborLeft: null,
     onBeforeFocus: null,
+    onBeforeChildFocus: null,
     onFocus: null,
     onClickEnter: null,
     onUnfocus: null
@@ -345,6 +346,11 @@ class FocusableSection extends Component {
 
   componentWillFocus(e) {
     const prevIsChild = e.detail.previousElement && this.el.contains(e.detail.previousElement);
+
+    if (this.props.onBeforeChildFocus) {
+      this.props.onBeforeChildFocus(e);
+    }
+
     if(prevIsChild){
       return;
     }
