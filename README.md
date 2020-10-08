@@ -80,4 +80,9 @@ Props:
        * 'last-focused' indicates the last focused element before we left this section last time. If this section has never been focused yet, the default element (if any) will be chosen next.
        * 'default-element' indicates the element defined in defaultElement.
        * an empty string.
+       
+   onBeforeFocus: (evt, focusableSectionDomElement)    
+   onBeforeChildFocus: (evt, focusableSectionDomElement)    
+   onFocus: (evt, focusableSectionDomElement)    
+   onBlur: (evt, focusableSectionDomElement)    
 ```

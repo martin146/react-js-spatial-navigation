@@ -348,7 +348,7 @@ class FocusableSection extends Component {
     const prevIsChild = e.detail.previousElement && this.el.contains(e.detail.previousElement);
 
     if (this.props.onBeforeChildFocus) {
-      this.props.onBeforeChildFocus(e);
+      this.props.onBeforeChildFocus(e, this.el);
     }
 
     if(prevIsChild){
@@ -356,7 +356,7 @@ class FocusableSection extends Component {
     }
     // console.warn('FocusableSection.componentWillFocus: ' + this.sectionId, e.target.className, document.activeElement);
     if (this.props.onBeforeFocus) {
-      this.props.onBeforeFocus(e);
+      this.props.onBeforeFocus(e, this.el);
     }
   }
 
@@ -367,7 +367,7 @@ class FocusableSection extends Component {
     }
     // console.warn('FocusableSection.componentFocused: ' + this.sectionId, e.target.className, document.activeElement);
     if (this.props.onFocus) {
-      this.props.onFocus(e);
+      this.props.onFocus(e, this.el);
     }
   }
 
@@ -378,14 +378,14 @@ class FocusableSection extends Component {
     }
     // console.warn('FocusableSection.componentUnfocused: ' + this.sectionId, e.target.className, document.activeElement);
     if (this.props.onUnfocus && leaving) {
-      this.props.onUnfocus(e);
+      this.props.onUnfocus(e, this.el);
     }
   }
 
   componentClickEnter(e) {
     // console.warn('FocusableSection.componentClickEnter: ' + this.sectionId, e.target.className, document.activeElement);
     if (this.props.onClickEnter) {
-      this.props.onClickEnter(e);
+      this.props.onClickEnter(e, this.el);
     }
   }
 
